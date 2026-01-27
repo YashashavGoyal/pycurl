@@ -1,6 +1,7 @@
 from typer import Typer
-from app.commands import get
-from app.utils.ui import PanelDisplay, TextDisplay
+
+from app.commands import get, post
+from app.utils import PanelDisplay, TextDisplay
 
 # Typer app instance
 app = Typer(
@@ -14,6 +15,12 @@ app.command(
     name="get",
     short_help="Perform a GET request"
 )(get)
+
+# pycurl post ...
+app.command(
+    name="post",
+    short_help="Perform a POST request"
+)(post)
 
 
 # pycurl version
