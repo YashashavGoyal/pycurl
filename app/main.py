@@ -1,6 +1,6 @@
 from typer import Typer
 
-from app.commands import get, post, put, patch
+from app.commands import get, post, put, patch, delete
 from app.utils import PanelDisplay, TextDisplay
 
 # Typer app instance
@@ -33,6 +33,12 @@ app.command(
     name="patch",
     short_help="Perform a PATCH request"
 )(patch)
+
+# pycurl delete ...
+app.command(
+    name="delete",
+    short_help="Perform a DELETE request"
+)(delete)
 
 
 # pycurl version
