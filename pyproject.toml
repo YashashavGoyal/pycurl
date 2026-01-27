@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pycurl"
+version = "0.1.0"
+description = "A lightweight curl-like CLI tool written in Python using requests"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "Yashashav Goyal" }
+]
+dependencies = [
+  "requests>=2.31.0",
+  "typer>=0.21.1",
+  "rich>=14.3.1"
+]
+
+[project.scripts]
+pycurl = "app.main:app"
+
