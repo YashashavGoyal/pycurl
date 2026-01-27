@@ -1,6 +1,6 @@
 from typer import Typer
 
-from app.commands import get, post, put
+from app.commands import get, post, put, patch
 from app.utils import PanelDisplay, TextDisplay
 
 # Typer app instance
@@ -27,6 +27,12 @@ app.command(
     name="put",
     short_help="Perform a PUT request"
 )(put)
+
+# pycurl patch ...
+app.command(
+    name="patch",
+    short_help="Perform a PATCH request"
+)(patch)
 
 
 # pycurl version
