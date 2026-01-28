@@ -3,6 +3,7 @@ from pathlib import Path
 from typer import Option
 
 from app.utils import TextDisplay
+from app.utils import CONFIG_PATH, getDefaultConfig
 
 
 
@@ -15,17 +16,11 @@ def init(
     created_config = False
     created_token = False
 
-    config_file = Path.home() / ".pycurl/config.json"
+    config_file = CONFIG_PATH
     token_file = Path(token_file_path).expanduser().resolve() if token_file_path else Path.home() / ".pycurl/tokens"
 
 
-    DEFAULT_CONFIG_TEMPLATE = {
-        "auth": {
-            "token_file": str(token_file),
-            "token_type": "Bearer",
-            "default_token": None
-        }
-    }
+    DEFAULT_CONFIG_TEMPLATE = getDefaultConfig(token_file)
 
     DEFAULT_TOKEN_TEMPLATE = """# alias:token\n# example\n# localhost:eyJhbGciOi...\n"""
 
@@ -66,8 +61,8 @@ def init(
         NEXT_STEPS = (
             "\nYou can now use pycurl commands.\n"
             "Next steps:\n"
-            "\t- Run `pycurl auth login ...`\n"
-            "\t- Use `-U <alias>` to attach a token"
+            "\t- Run [blue]`pycurl auth login ...`[/blue]\n"
+            "\t- Use [blue]`-U <alias>`[/blue] to attach a token"
         )
 
 

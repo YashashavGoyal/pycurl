@@ -1,6 +1,6 @@
 from typer import Typer
 
-from app.commands import init, get, post, put, patch, delete, auth
+from app.commands import init, config, get, post, put, patch, delete, auth
 from app.utils import PanelDisplay, TextDisplay
 
 # Typer app instance
@@ -14,6 +14,9 @@ app = Typer(
 
 # pycurl auth ...
 app.add_typer(auth)
+
+# pycurl config ...
+app.add_typer(config)
 
 # pycurl init ...
 app.command(
