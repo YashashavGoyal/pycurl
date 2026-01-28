@@ -20,7 +20,10 @@ def get(
         
         if show_content:
             TextDisplay().info_text("Response Content:", style="white")
-            pprint(response.json())
+            try:
+                pprint(response.json())
+            except ValueError:
+                pprint(response.text)
         if save_to_file:
             saveResponseToFile(response, save_to_file, response_format)
 

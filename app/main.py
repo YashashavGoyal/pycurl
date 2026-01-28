@@ -1,6 +1,6 @@
 from typer import Typer
 
-from app.commands import get, post, put, patch, delete
+from app.commands import get, post, put, patch, delete, auth
 from app.utils import PanelDisplay, TextDisplay
 
 # Typer app instance
@@ -8,7 +8,12 @@ app = Typer(
     name="pycurl", 
     help="A lightweight curl-like CLI tool written in Python using requests",
     no_args_is_help=True
-    )
+)
+
+# Registering subcommands
+
+# pycurl auth ...
+app.add_typer(auth)
 
 # pycurl get ...
 app.command(
