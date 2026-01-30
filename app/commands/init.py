@@ -20,7 +20,7 @@ def init(
     token_file = Path(token_file_path).expanduser().resolve() if token_file_path else Path.home() / ".pycurl/tokens"
 
 
-    DEFAULT_CONFIG_TEMPLATE = getDefaultConfig(token_file)
+    DEFAULT_CONFIG_TEMPLATE = getDefaultConfig(token_file=token_file)
 
     DEFAULT_TOKEN_TEMPLATE = """# alias:token\n# example\n# localhost:eyJhbGciOi...\n"""
 
@@ -28,24 +28,24 @@ def init(
     try:
 
         if token_file == config_file:
-            raise SystemExit(TextDisplay().error_text("Token file and config file cannot be the same"))
+            raise SystemExit(TextDisplay.error_text("Token file and config file cannot be the same"))
 
         if overwrite:
-            TextDisplay().warn_text("Overwrite enabled: existing files may be replaced.")
+            TextDisplay.warn_text("Overwrite enabled: existing files may be replaced.")
 
         if not config_file.exists() or overwrite:
             if config_file.parent.exists():
-                TextDisplay().info_text(f"Config directory exists: {config_file.parent}")
+                TextDisplay.info_text(f"Config directory exists: {config_file.parent}")
             else:
                 config_file.parent.mkdir(parents=True, exist_ok=True)
-                TextDisplay().success_text(f"Created directory: {config_file.parent}")
+                TextDisplay.success_text(f"Created directory: {config_file.parent}")
             with open(config_file, "w", encoding="utf-8") as cf:
                 json.dump(DEFAULT_CONFIG_TEMPLATE, cf, indent=4)
             created_config = True
-            TextDisplay().success_text(f"Created configuration file at: {config_file}")
+            TextDisplay.success_text(f"Created configuration file at: {config_file}")
         else:
-            TextDisplay().info_text(f"Config directory exists: {config_file.parent}")
-            TextDisplay().info_text(f"Configuration file already exists at: {config_file}")
+            TextDisplay.info_text(f"Config directory exists: {config_file.parent}")
+            TextDisplay.info_text(f"Configuration file already exists at: {config_file}")
 
         if not token_file.exists() or overwrite:
             token_file.parent.mkdir(parents=True, exist_ok=True)
@@ -54,9 +54,9 @@ def init(
                 encoding="utf-8"
             )
             created_token = True
-            TextDisplay().success_text("Created tokens file")
+            TextDisplay.success_text("Created tokens file")
         else:
-            TextDisplay().info_text("tokens file already exists")     
+            TextDisplay.info_text("tokens file already exists")     
 
         NEXT_STEPS = (
             "\nYou can now use pycurl commands.\n"
@@ -67,24 +67,24 @@ def init(
 
 
         if created_config or created_token:
-            TextDisplay().style_text(
+            TextDisplay.style_text(
                 f"pycurl initialized at {config_file.parent}",
                 style="white"
             )
-            TextDisplay().style_text(
+            TextDisplay.style_text(
                 NEXT_STEPS,
                 style="white"
             )
         else:
-            TextDisplay().style_text(
+            TextDisplay.style_text(
                 "pycurl already initialized",
                 style="white"
             )
-            TextDisplay().style_text(
+            TextDisplay.style_text(
                 NEXT_STEPS,
                 style="white"
             )
    
 
     except Exception as e:
-        raise SystemExit(TextDisplay().error_text(f"Failed to initialize configuration file: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Failed to initialize configuration file: {e}"))

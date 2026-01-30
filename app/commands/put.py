@@ -1,7 +1,6 @@
 import requests
 import json
 from typer import Argument, Option
-from pprint import pprint
 
 from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse
 
@@ -26,10 +25,10 @@ def put(
                 headers[key.strip()] = value.strip()
 
         if not json_data and not data:
-            TextDisplay().warn_text("Sending PUT request without a request body")
+            TextDisplay.warn_text("Sending PUT request without a request body")
 
         if json_data and data:
-            raise SystemExit(TextDisplay().error_text("Use either --json or --data, not both"))
+            raise SystemExit(TextDisplay.error_text("Use either --json or --data, not both"))
 
         elif json_data:
             headers.setdefault("Content-Type", "application/json")
@@ -51,16 +50,16 @@ def put(
             response = requests.put(url, headers=headers)
 
         response.raise_for_status() 
-        TextDisplay().style_text(f"PUT request to {url} successful.", style="white")
-        TextDisplay().success_text(f"Status Code: {response.status_code}")
+        TextDisplay.style_text(f"PUT request to {url} successful.", style="white")
+        TextDisplay.success_text(f"Status Code: {response.status_code}")
  
         if save_to_file:
             saveResponseToFile(response, save_to_file, response_format)
 
         if show_content:
-            TextDisplay().info_text("Response Content:", style="white")
+            TextDisplay.info_text("Response Content:", style="white")
             try:
-                pprint(response.json())
+                TextDisplay.print_json(response.json())
             except ValueError:
                 print(response.text)
 
@@ -68,8 +67,8 @@ def put(
             saveRequestResponse(response, save_request_to_file)
 
         if show_request:
-            TextDisplay().info_text("Request Details:")
-            pprint({
+            TextDisplay.info_text("Request Details:")
+            TextDisplay.print_json({
                 "method": response.request.method,
                 "url": response.request.url,
                 "headers": dict(response.request.headers),
@@ -79,13 +78,13 @@ def put(
                     else response.request.body
                 )
             })
-            # pprint(response.request.__dict__)
+            # TextDisplay.print_json(response.request.__dict__)
 
     except requests.exceptions.RequestException as e:
-        raise SystemExit(TextDisplay().error_text(f"Error during PUT request: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Error during PUT request: {e}"))
     
     except json.JSONDecodeError as jde:
-        raise SystemExit(TextDisplay().error_text(f"Invalid JSON data: {jde}"))
+        raise SystemExit(TextDisplay.error_text(f"Invalid JSON data: {jde}"))
 
     except Exception as ex:
-        raise SystemExit(TextDisplay().error_text(f"An error occurred: {ex}"))
+        raise SystemExit(TextDisplay.error_text(f"An error occurred: {ex}"))

@@ -62,7 +62,7 @@ app.command(
 )
 def version():
     """Show the version of PyCurl"""
-    TextDisplay().style_text("PyCurl version: 0.1.0",style="white")
+    TextDisplay.style_text("PyCurl version: 0.1.0",style="white")
 
 # pycurl about
 @app.command(
@@ -71,7 +71,7 @@ def version():
 )
 def about():
     """Show information about PyCurl"""
-    PanelDisplay().print_panel("About PyCurl", "PyCurl is a lightweight curl-like CLI tool written in Python using requests.", border_style="cyan", subtitle="Version 0.1.0")
+    PanelDisplay.print_panel("About PyCurl", "PyCurl is a lightweight curl-like CLI tool written in Python using requests.", border_style="cyan", subtitle="Version 0.1.0")
 
 
 

@@ -1,21 +1,20 @@
 from pathlib import Path
 import json
 
-
 # Default Config Path
 CONFIG_PATH = Path.home() / ".pycurl" / "config.json"
 
 # Default Config Template
-def getDefaultConfig(token_file:Path) -> dict:
+DEFAULT_TOKEN_PATH = Path.home()/".pycurl/tokens"
+def getDefaultConfig(token_file:Path = DEFAULT_TOKEN_PATH, token_type:str = "Bearer", default_token:str|None = None) -> dict:
     DEFAULT_CONFIG_TEMPLATE = {
         "auth": {
             "token_file": str(token_file),
-            "token_type": "Bearer",
-            "default_token": None
+            "token_type": token_type,
+            "default_token": default_token
         }
     }
     return DEFAULT_CONFIG_TEMPLATE
-
 
 # Error classes for Config Exception
 class ConfigError(Exception):
@@ -75,8 +74,6 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
 
 # For Future Use
 # load + Validate
-
-
 def loadAndValidateConfig(config_path) -> dict:
     config_data = loadConfig(config_path)
     isValid, errors = configValidator(config_data=config_data)
@@ -85,7 +82,6 @@ def loadAndValidateConfig(config_path) -> dict:
         raise InvalidConfig("Validation failed")
 
     return config_data
-
 
 # Implement token path resolution logic here
 def tokenPathResolver(config_data: dict) -> Path:

@@ -1,6 +1,5 @@
 import requests
 from typer import Argument, Option
-from pprint import pprint
 
 from app.utils import TextDisplay, saveResponseToFile
 
@@ -15,18 +14,18 @@ def get(
     try:
         response = requests.get(url)
         response.raise_for_status() 
-        TextDisplay().style_text(f"GET request to {url} successful.", style="white")
-        TextDisplay().success_text(f"Status Code: {response.status_code}")
+        TextDisplay.style_text(f"GET request to {url} successful.", style="white")
+        TextDisplay.success_text(f"Status Code: {response.status_code}")
         
         if show_content:
-            TextDisplay().info_text("Response Content:", style="white")
+            TextDisplay.info_text("Response Content:", style="white")
             try:
-                pprint(response.json())
+                TextDisplay.print_json(response.json())
             except ValueError:
-                pprint(response.text)
+                print(response.text)
         if save_to_file:
             saveResponseToFile(response, save_to_file, response_format)
 
     except requests.exceptions.RequestException as e:
-        raise SystemExit(TextDisplay().error_text(f"Error during GET request: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Error during GET request: {e}"))
     

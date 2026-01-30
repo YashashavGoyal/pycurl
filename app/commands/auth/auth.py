@@ -35,7 +35,7 @@ def login(
         )
 
     except Exception as e:
-        raise SystemExit(TextDisplay().error_text(f"Login failed: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Login failed: {e}"))
 
 
 # pycurl auth register ...
@@ -64,4 +64,4 @@ def register(
         )
 
     except Exception as e:
-        raise SystemExit(TextDisplay().error_text(f"Registration failed: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Registration failed: {e}"))

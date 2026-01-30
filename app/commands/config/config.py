@@ -1,6 +1,6 @@
-from typer import Typer, Context
+from typer import Typer, Context, Option
 
-from .commands import show, validate, get, set_conf
+from .commands import show, validate, get, set_conf, generate
 
 # Subcommand config
 config = Typer(
@@ -45,9 +45,7 @@ config.command(
 )(set_conf)
 
 # pycurl config generate ...
-@config.command(
+config.command(
     name="generate",
-    short_help="Generate or update the config file for user customisation. [green]Most Recommended[/green]"
-)
-def generate(): # will do it today
-    pass
+    short_help="Generate or update the config file for user customisation. [green]Most Recommended[/green]",
+)(generate)

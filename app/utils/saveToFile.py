@@ -21,10 +21,10 @@ def saveResponseToFile(response: requests.Response, file_path: str, format: str 
             else:
                 f.write(response.text)
 
-        TextDisplay().success_text(f"Response saved to {file_path}", style="white")
+        TextDisplay.success_text(f"Response saved to {file_path}", style="white")
     
     except ValueError as ve:
-        raise SystemExit(TextDisplay().error_text(str(ve)))
+        raise SystemExit(TextDisplay.error_text(str(ve)))
     
     except Exception as e:
-        raise SystemExit(TextDisplay().error_text(f"Error saving response to file: {e}"))
+        raise SystemExit(TextDisplay.error_text(f"Error saving response to file: {e}"))

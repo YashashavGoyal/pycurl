@@ -1,5 +1,4 @@
 from typer import Option
-from pprint import pprint
 
 from app.utils import (
     CONFIG_PATH, 
@@ -30,10 +29,10 @@ def show(
                 f"\t [cyan]Default Token[/cyan] : {default_token}\n"
             )
 
-            TextDisplay().style_text(Config, style="white")
+            TextDisplay.style_text(Config, style="white")
 
         if format == "json":
-            pprint(config_data)
+            TextDisplay.print_json(config_data)
 
     except InvalidConfig:
         ERROR = (
@@ -42,8 +41,8 @@ def show(
                 "\t - Use [cyan]pycurl config generate[/cyan] to generate new config\n"
                 "\t - Or simply run [cyan]pycurl init -o[/cyan] overwrite existing config"
             )
-        TextDisplay().style_text(ERROR, style="white")
+        TextDisplay.style_text(ERROR, style="white")
         raise SystemExit(1)
 
     except ConfigError as ce:
-        TextDisplay().error_text(f"{ce}")
+        TextDisplay.error_text(f"{ce}")

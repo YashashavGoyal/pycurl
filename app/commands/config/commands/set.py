@@ -31,15 +31,15 @@ def set_conf(
                 if not value.exists():
                     value.parent.mkdir(parents=True, exist_ok=True)
 
-                    TextDisplay().error_text(f"token file not found at {value}")
-                    TextDisplay().style_text("Creating token file...", style="gray50")
+                    TextDisplay.error_text(f"token file not found at {value}")
+                    TextDisplay.style_text("Creating token file...", style="gray50")
                     
                     DEFAULT_TOKEN_TEMPLATE = """# alias:token\n# example\n# localhost:eyJhbGciOi...\n"""
                     value.write_text(
                         DEFAULT_TOKEN_TEMPLATE,
                         encoding="utf-8"
                     )
-                    TextDisplay().style_text("token file created", style="gray50")
+                    TextDisplay.style_text("token file created", style="gray50")
                 value = str(value)
 
             except Exception as e:
@@ -55,18 +55,18 @@ def set_conf(
         valid, errors = configValidator(config_data)
         if not valid:
             for e in errors:
-                TextDisplay().error_text(str(e))
+                TextDisplay.error_text(str(e))
             raise SystemExit(1)
 
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config_data, f, indent=4)
 
-        TextDisplay().success_text("Configuration updated")
+        TextDisplay.success_text("Configuration updated")
 
     except ConfigError as ce:
-        TextDisplay().error_text(str(ce))
+        TextDisplay.error_text(str(ce))
     
     except ValueError as ve:
-        TextDisplay().error_text(f"Error: {ve}")
+        TextDisplay.error_text(f"Error: {ve}")
  

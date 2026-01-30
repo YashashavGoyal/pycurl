@@ -16,7 +16,7 @@ def validate():
         isValid, errors = configValidator(config_data=config_data)
         if not isValid:
             for err in errors:
-                TextDisplay().error_text(f"- {err}")
+                TextDisplay.error_text(f"- {err}")
 
             ERROR = (
             "\n[yellow]How to reslove errors[/yellow]\n"
@@ -26,13 +26,13 @@ def validate():
             "\t - pycurl config [blue]set[/blue] or\n"
             "\t - pycurl config [blue]generate[/blue]\n"
             )
-            TextDisplay().style_text(ERROR, style="white")
+            TextDisplay.style_text(ERROR, style="white")
 
             raise SystemExit(1)
         
         else:
-            TextDisplay().success_text("Your Configuration File is alright")
+            TextDisplay.success_text("Your Configuration File is alright")
 
     except ConfigError as ce:
-        TextDisplay().error_text(f"{ce}")
+        TextDisplay.error_text(f"{ce}")
 
