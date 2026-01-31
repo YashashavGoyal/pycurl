@@ -3,6 +3,7 @@ import requests
 
 from app.utils import TextDisplay
 
+# Helper Function to save Response in file
 def saveRequestResponse(response: requests.Response, filename: str="request.response.json"):
     """Save the request and response details to a file in JSON format."""
 

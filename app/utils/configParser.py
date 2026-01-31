@@ -64,6 +64,14 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
     if not isinstance(token_type, str):
         errors.append(InvalidConfig("'auth.token_type' must be a string (can be empty)"))
 
+    # Validate default_token
+    default_token = auth.get("default_token")
+    if default_token is not None:
+        if not isinstance(default_token, str):
+            errors.append(InvalidConfig("'auth.default_token' must be a string or null"))
+        elif ":" in default_token:
+            errors.append(InvalidConfig("'auth.default_token' cannot contain ':'"))
+
     # Check for unexpected keys inside auth
     allowed_auth_keys = {"token_file", "token_type", "default_token"}
     extra_auth = set(auth.keys()) - allowed_auth_keys
@@ -86,7 +94,7 @@ def loadAndValidateConfig(config_path) -> dict:
 # Implement token path resolution logic here
 def tokenPathResolver(config_data: dict) -> Path:
     raw_path = config_data["auth"]["token_file"]
-    return Path(raw_path).expanduser()
+    return Path(raw_path).expanduser().resolve()
 
 # Implement token type resolution logic here
 def tokenTypeResolver(config_data: dict) -> str:

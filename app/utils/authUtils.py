@@ -4,6 +4,7 @@ import json
 from app.utils import TextDisplay, saveResponseToFile
 
 
+# Authentication Logic for auth login / register
 def authManager(
     *,
     url: str,

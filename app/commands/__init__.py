@@ -14,4 +14,7 @@ from .delete import delete
 # Authentication Request
 from .auth.auth import auth
 
-__all__ = ["init", "config", "get", "post", "put", "patch", "delete", "auth"]
+# Token Management
+from .token.token import token
+
+__all__ = ["init", "config", "get", "post", "put", "patch", "delete", "auth", "token"]

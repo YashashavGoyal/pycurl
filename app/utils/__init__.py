@@ -24,14 +24,18 @@ from .configParser import (
     configValidator, 
     loadAndValidateConfig,
     tokenPathResolver, 
-    tokenTypeResolver, 
-    defaultTokenResolver, 
     extractConfigAttributes,
 
     # Error Classes for Config
     ConfigError,
     ConfigNotFound,
     InvalidConfig
+)
+
+from .tokenParser import (
+    parse_token_file,
+    resolve_token,
+    alias_validator
 )
 
 __all__ = [
@@ -44,11 +48,16 @@ __all__ = [
     "authManager",
     "CONFIG_PATH",
     "DEFAULT_TOKEN_PATH",
+    "getDefaultConfig",
     "loadConfig",
     "configValidator",
     "loadAndValidateConfig",
+    "tokenPathResolver",
     "extractConfigAttributes",
     "ConfigError",
     "ConfigNotFound",
-    "InvalidConfig"
+    "InvalidConfig",
+    "parse_token_file",
+    "resolve_token",
+    "alias_validator"
 ]
