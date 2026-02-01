@@ -54,6 +54,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
@@ -67,4 +69,4 @@ jobs:
       with:
         files: artifacts/*
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
