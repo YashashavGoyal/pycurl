@@ -65,7 +65,7 @@ app.command(
 )
 def version():
     """Show the version of PyCurl"""
-    TextDisplay.style_text("PyCurl version: 0.1.0",style="white")
+    TextDisplay.style_text("PyCurl version: 1.0.0",style="white")
 
 # pycurl about
 @app.command(
