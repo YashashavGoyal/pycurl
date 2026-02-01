@@ -1,0 +1,4 @@
+requests>=2.31.0
+typer>=0.21.1
+rich>=14.3.1
+pyinstaller>=6.3.0
