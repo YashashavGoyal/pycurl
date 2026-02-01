@@ -20,7 +20,9 @@ def login(
     show_content: bool = Option(False, "-s", "--show-content", help="Whether to display the response content"),
     save_to_file: str | None = Option(None, "-o", "--save-to-file", help="File path to save the login response"),
     token_field: str = Option("token", "-t", "--token-field", help="Field name in the response JSON that contains the token"),
-    store_token_to_file: str | None = Option(None, "-S", "--store-token", help="Store the token to a specified file")
+    store_token_to_file: str | None = Option(None, "-S", "--store-token", help="Store the token to a specified file"),
+    cookie_token: str | None = Option(None, "--cookie-token", help="Key of the cookie to extract the token from"),
+    save_alias: str | None = Option(None, "-a", "--save-alias", help="Save the token to the default config with this alias")
 ):
     """Perform a login request to obtain and store an authentication token."""
     try:
@@ -31,7 +33,9 @@ def login(
             success_msg="Login successful!",
             save_to_file=save_to_file,
             token_field=token_field,
-            store_token_to_file=store_token_to_file
+            store_token_to_file=store_token_to_file,
+            cookie_token=cookie_token,
+            save_alias=save_alias
         )
 
     except Exception as e:
@@ -49,7 +53,9 @@ def register(
     show_content: bool = Option(False, "-s", "--show-content", help="Whether to display the response content"),
     save_to_file: str | None = Option(None, "-o", "--save-to-file", help="File path to save the registration response"),
     token_field: str = Option("token", "-t", "--token-field", help="Field name in the response JSON that contains the token"),
-    store_token_to_file: str | None = Option(None, "-S", "--store-token", help="Store the token to a specified file")
+    store_token_to_file: str | None = Option(None, "-S", "--store-token", help="Store the token to a specified file"),
+    cookie_token: str | None = Option(None, "--cookie-token", help="Key of the cookie to extract the token from"),
+    save_alias: str | None = Option(None, "-a", "--save-alias", help="Save the token to the default config with this alias")
 ):
     """Perform a registration request to obtain and store an authentication token."""
     try:
@@ -60,7 +66,9 @@ def register(
             success_msg="Registration successful!",
             save_to_file=save_to_file,
             token_field=token_field,
-            store_token_to_file=store_token_to_file
+            store_token_to_file=store_token_to_file,
+            cookie_token=cookie_token,
+            save_alias=save_alias
         )
 
     except Exception as e:

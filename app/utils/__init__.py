@@ -35,7 +35,10 @@ from .configParser import (
 from .tokenParser import (
     parse_token_file,
     resolve_token,
-    alias_validator
+    alias_validator,
+    getSavedToken,
+    storeTokenToFile,
+    saveTokenToDefaultConfig
 )
 
 __all__ = [
@@ -59,5 +62,8 @@ __all__ = [
     "InvalidConfig",
     "parse_token_file",
     "resolve_token",
-    "alias_validator"
+    "alias_validator",
+    "getSavedToken",
+    "storeTokenToFile",
+    "saveTokenToDefaultConfig"
 ]

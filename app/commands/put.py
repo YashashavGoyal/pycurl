@@ -2,7 +2,7 @@ import requests
 import json
 from typer import Argument, Option
 
-from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse
+from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken
 
 def put(
     url: str = Argument(..., help="The URL to send the PUT request to"),
@@ -14,6 +14,9 @@ def put(
     json_data: str = Option(None, "-j", "--json", help="JSON data to include in the PUT request body (use '@filename' to read from file)"),
     data: str = Option(None, "-d", "--data", help="Data to include in the PUT request"),
     headers_list: list[str] = Option(None, "-H", "--header", help="Additional headers to include in the PUT request"),
+    user_saved_requests: str | None = Option(None, "-U", "--use-token", help="Provide alias to use saved token from token file (type [cyan]default[/cyan] to use the default token)"),
+    token_placement: str = Option("header", "-tp", "--token-placement", help="Where to attach the token: 'header' or 'cookie'"),
+    token_cookie_name: str = Option("access_token", "-cn", "--cookie-name", help="Name of the cookie if token placement is 'cookie'")
 ):
     """Perform a PUT request to the specified URL with the given headers, body and return the response."""
     try:
@@ -23,6 +26,19 @@ def put(
             for header in headers_list:
                 key, value = header.split(":", 1)
                 headers[key.strip()] = value.strip()
+
+        if user_saved_requests:
+            token, token_headers = getSavedToken(user_saved_requests)
+            if token_placement.lower() == "header":
+                headers.update(token_headers)
+            elif token_placement.lower() != "cookie":
+                 TextDisplay.warn_text(f"Unknown token placement '{token_placement}', defaulting to header.")
+                 headers.update(token_headers)
+
+        request_cookies = {}
+        if user_saved_requests and token_placement.lower() == "cookie":
+             token, _ = getSavedToken(user_saved_requests)
+             request_cookies[token_cookie_name] = token
 
         if not json_data and not data:
             TextDisplay.warn_text("Sending PUT request without a request body")
@@ -40,16 +56,24 @@ def put(
             else:
                 payload = json.loads(json_data)
 
-            response = requests.put(url, json=payload, headers=headers)
+            response = requests.put(url, json=payload, headers=headers, cookies=request_cookies)
 
         elif data:
             headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
-            response = requests.put(url, data=data, headers=headers)
+            response = requests.put(url, data=data, headers=headers, cookies=request_cookies)
 
         else:
-            response = requests.put(url, headers=headers)
+            response = requests.put(url, headers=headers, cookies=request_cookies)
 
-        response.raise_for_status() 
+        if response.status_code >= 400:
+            try:
+                response_json = response.json()
+                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
+                TextDisplay.print_json(response_json)
+            except ValueError:
+                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
+                print(response.text)
+            raise SystemExit(response.status_code) 
         TextDisplay.style_text(f"PUT request to {url} successful.", style="white")
         TextDisplay.success_text(f"Status Code: {response.status_code}")
  

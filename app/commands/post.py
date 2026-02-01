@@ -2,7 +2,7 @@ import json
 import requests
 from typer import Argument, Option
 
-from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse
+from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken
 
 def post(
     url: str = Argument(..., help="The URL to send the POST request to"),
@@ -14,6 +14,9 @@ def post(
     json_data: str = Option(None, "-j", "--json", help="JSON data to include in the POST request body (use '@filename' to read from file)"),
     data: str = Option(None, "-d", "--data", help="Data to include in the POST request"),
     headers_list: list[str] = Option(None, "-H", "--header", help="Additional headers to include in the POST request"),
+    user_saved_requests: str | None = Option(None, "-U", "--use-token", help="Provide alias to use saved token from token file (type [cyan]default[/cyan] to use the default token)"),
+    token_placement: str = Option("header", "-tp", "--token-placement", help="Where to attach the token: 'header' or 'cookie'"),
+    token_cookie_name: str = Option("access_token", "-cn", "--cookie-name", help="Name of the cookie if token placement is 'cookie'")
 ):
     """Perform a POST request to the specified URL with the given headers, body and return the response."""
     try:
@@ -23,6 +26,26 @@ def post(
             for header in headers_list:
                 key, value = header.split(":", 1)
                 headers[key.strip()] = value.strip()
+
+        if user_saved_requests:
+            token, token_headers = getSavedToken(user_saved_requests)
+            if token_placement.lower() == "header":
+                headers.update(token_headers)
+            elif token_placement.lower() == "cookie":
+                # For POST, we might need to pass cookies argument to requests.post
+                # requests.post(..., cookies=cookies)
+                # But we manipulate 'headers' dict here and pass it later.
+                # We need to create a 'cookies' dict and pass it to requests.post calls.
+                pass
+            else:
+                 TextDisplay.warn_text(f"Unknown token placement '{token_placement}', defaulting to header.")
+                 headers.update(token_headers)
+
+        # Initialize cookies dict for the request
+        request_cookies = {}
+        if user_saved_requests and token_placement.lower() == "cookie":
+             token, _ = getSavedToken(user_saved_requests) # Re-getting clean token or using prev
+             request_cookies[token_cookie_name] = token
 
         if json_data and data:
             raise SystemExit(TextDisplay.error_text("Use either --json or --data, not both"))
@@ -37,16 +60,24 @@ def post(
             else:
                 payload = json.loads(json_data)
 
-            response = requests.post(url, json=payload, headers=headers)
+            response = requests.post(url, json=payload, headers=headers, cookies=request_cookies)
 
         elif data:
             headers.setdefault("Content-Type", "application/x-www-form-urlencoded")
-            response = requests.post(url, data=data, headers=headers)
+            response = requests.post(url, data=data, headers=headers, cookies=request_cookies)
 
         else:
-            response = requests.post(url, headers=headers)
+            response = requests.post(url, headers=headers, cookies=request_cookies)
 
-        response.raise_for_status() 
+        if response.status_code >= 400:
+            try:
+                response_json = response.json()
+                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
+                TextDisplay.print_json(response_json)
+            except ValueError:
+                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
+                print(response.text)
+            raise SystemExit(response.status_code) 
         TextDisplay.style_text(f"POST request to {url} successful.", style="white")
         TextDisplay.success_text(f"Status Code: {response.status_code}")
  

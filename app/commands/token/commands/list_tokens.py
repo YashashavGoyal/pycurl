@@ -2,7 +2,6 @@ from typer import Argument
 
 from app.utils import (
     CONFIG_PATH,
-    resolve_token,
     parse_token_file,
     extractConfigAttributes,
     loadAndValidateConfig,
