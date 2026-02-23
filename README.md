@@ -1,9 +1,9 @@
 # PyCurl
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Typer](https://img.shields.io/badge/typer-000000?style=for-the-badge&logo=typer&logoColor=white)
-![Requests](https://img.shields.io/badge/requests-2CA5E0?style=for-the-badge&logo=python&logoColor=white)
-![Rich](https://img.shields.io/badge/rich-000000?style=for-the-badge&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.10+-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Typer](https://img.shields.io/badge/typer-0.21.1+-000000?style=for-the-badge&logo=typer&logoColor=white)
+![Requests](https://img.shields.io/badge/requests-2.31.0+-2CA5E0?style=for-the-badge&logo=python&logoColor=white)
+![Rich](https://img.shields.io/badge/rich-14.3.1+-000000?style=for-the-badge&logo=python&logoColor=white)
 
 ![License](https://img.shields.io/github/license/YashashavGoyal/pycurl?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/YashashavGoyal/pycurl?style=for-the-badge)
@@ -51,11 +51,11 @@ flowchart LR
   - Securely save and manage authentication tokens.
   - Support for custom aliases for tokens.
   - Insert tokens automatically into headers or cookies.
+- **In-built Documentation**: Interactive documentation viewer directly in the CLI.
 - **Configuration System**:
   - Persist settings across sessions.
-  - Easy `init` and `config` commands.
+  - Interactive configuration generation with `pycurl config generate`.
 - **Cross-Platform**: Works seamlessly on Windows, macOS, and Linux.
-
 ## 🚀 DevOps & Deployment
 
 We use **GitHub Actions** for our CI/CD pipeline to ensure code quality and automated testing.
@@ -66,62 +66,83 @@ Our pipeline validates every commit:
 1.  **Testing**: Runs unit and integration tests. (will be comming soon)
 2.  **Build**: Verifies that the package builds correctly.
 
-## Installation
 
-### Prerequisites
-- Python 3.10+
+## 📥 Download & Installation
 
-### Install via pip (Development)
+### Option 1: Download Pre-built Binary (Recommended)
+You can download the latest standalone executable for your platform from the [Releases](https://github.com/YashashavGoyal/pycurl/releases) page.
+1. Go to the [Releases](https://github.com/YashashavGoyal/pycurl/releases) section.
+2. Download the version for your OS (Windows, Linux, or macOS).
+3. (Optional) Add the executable to your system PATH to run it from anywhere.
 
+### Option 2: Install via pip (Development)
+**Prerequisites**: Python 3.10+
 ```bash
 git clone https://github.com/YashashavGoyal/pycurl.git
 cd pycurl
 pip install .
 ```
 
-## Usage
+## 🛠️ Usage
 
 ### Initialization
-Initialize `pycurl` with a default configuration:
+Initialize your environment:
 ```bash
 pycurl init
 ```
 
 ### Making Requests
 
-**GET Request**
+**Simple GET Request**
 ```bash
-pycurl get https://jsonplaceholder.typicode.com/posts/1
+pycurl get https://jsonplaceholder.typicode.com/posts/1 --show-content
 ```
 
-**POST Request**
+**POST Request with JSON Data**
 ```bash
-pycurl post https://api.example.com/users -d '{"name": "John", "job": "Dev"}'
+pycurl post https://api.example.com/users --json '{"name": "Alice"}'
 ```
 
-**Authentication**
-Save a token for future use:
+**POST Request from File**
 ```bash
-pycurl token save --alias myapi --value eyJhbGciOi...
+pycurl post https://api.example.com/users --json @data.json
 ```
-Use the token in a request:
+
+### Authentication & Tokens
+Save a token with an alias:
 ```bash
-pycurl get https://api.example.com/protected --token-alias myapi
+pycurl token set --alias myapi --token "your-token-here"
+```
+
+Use the saved token in a request:
+```bash
+pycurl get https://api.example.com/protected -U myapi
+```
+
+### In-built Docs
+View detailed documentation for any command:
+```bash
+pycurl docs get
+pycurl docs post
 ```
 
 ## 📂 Modular Code Structure
 
 ```bash
 ├── app/
-│   ├── (commands)/          # Individual CLI Commands
-│   │   ├── get.py
-│   │   ├── post.py
-│   │   ├── auth/            # Auth Management
+│   ├── commands/            # CLI Command Implementations
+│   │   ├── docs/            # In-built Markdown Docs
+│   │   ├── auth/            # Auth Management Logic
+│   │   ├── config/          # Configuration Logic
+│   │   ├── token/           # Token Management Logic
+│   │   ├── get.py           # GET Command
+│   │   ├── post.py          # POST Command
 │   │   └── ...
-│   ├── main.py              # Entry Point (Typer App)
-│   └── utils/               # Helpers (Display, Parsers)
-├── pyproject.toml           # Project Dependencies & Metadata
-└── tests/                   # Unit Tests
+│   ├── utils/               # Helpers (UI, Parsers, Auth Utils)
+│   └── main.py              # Application Entry Point
+├── .github/                 # CI/CD Workflows (Releases)
+├── pyproject.toml           # Metadata & Dependencies
+└── README.md
 ```
 
 ---
