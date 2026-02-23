@@ -4,6 +4,7 @@ from typer import Argument, Option
 
 from app.utils import TextDisplay, saveRequestResponse, saveResponseToFile, getSavedToken
 
+# pycurl delete
 def delete(
     url: str = Argument(..., help="The URL to send the DELETE request to"),
     save_to_file: str = Option(None, "-o", "--output", help="File path to save the response content"),
@@ -23,23 +24,23 @@ def delete(
     try:
         headers = {}
 
+        # Parse headers from list
         if headers_list:
             for header in headers_list:
                 key, value = header.split(":", 1)
                 headers[key.strip()] = value.strip()
 
+        # Handle authenticated requests
+        request_cookies = {}
         if user_saved_requests:
             token, token_headers = getSavedToken(user_saved_requests)
             if token_placement.lower() == "header":
                 headers.update(token_headers)
-            elif token_placement.lower() != "cookie":
+            elif token_placement.lower() == "cookie":
+                request_cookies[token_cookie_name] = token
+            else:
                  TextDisplay.warn_text(f"Unknown token placement '{token_placement}', defaulting to header.")
                  headers.update(token_headers)
-
-        request_cookies = {}
-        if user_saved_requests and token_placement.lower() == "cookie":
-             token, _ = getSavedToken(user_saved_requests)
-             request_cookies[token_cookie_name] = token
 
         if json_data or data:
             TextDisplay.warn_text("DELETE request with body detected (allowed but not widely supported)")
@@ -48,6 +49,7 @@ def delete(
             raise SystemExit(TextDisplay.error_text("Use either --json or --data, not both"))
 
         elif json_data:
+            # Handle JSON payload
             headers.setdefault("Content-Type", "application/json")
 
             if json_data.strip().startswith("@"):
@@ -65,6 +67,7 @@ def delete(
         else:
             response = requests.delete(url, headers=headers, cookies=request_cookies)
 
+        # Handle failed requests
         if response.status_code >= 400:
             try:
                 response_json = response.json()
@@ -74,9 +77,11 @@ def delete(
                 TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
                 print(response.text)
             raise SystemExit(response.status_code) 
+
+        # Success message
         TextDisplay.style_text(f"DELETE request to {url} successful.", style="white")
         TextDisplay.success_text(f"Status Code: {response.status_code}")
- 
+
         if save_to_file:
             saveResponseToFile(response, save_to_file, response_format)
 

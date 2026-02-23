@@ -27,7 +27,7 @@ def saveRequestResponse(response: requests.Response, filename: str="request.resp
         }
 
         with open(filename, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=4)
         TextDisplay.success_text(f"Request and response saved to {filename}")
 
     except Exception as e:

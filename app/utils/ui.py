@@ -4,13 +4,17 @@ from rich.panel import Panel
 from rich.text import Text
 from rich.prompt import Prompt, Confirm
 from rich.json import JSON
+from rich.markdown import Markdown
+
+from pathlib import Path
 
 from typing import Callable, List
 import re
 
+# Central Console instance
 console = Console()
 
-# Text display utilities
+# Display logic for plain and styled text
 class TextDisplay:
     INFO = "blue"
     WARNING = "yellow"
@@ -95,7 +99,6 @@ class PanelDisplay:
 
     @staticmethod
     def print_multi_style_panel(
-             
             title: str, 
             content_parts: list, 
             border_style: str = "blue bold",
@@ -113,7 +116,7 @@ class PanelDisplay:
         )
         console.print(panel)
 
-# Table display utilities
+# Table display utility
 class TableDisplay:
     def __init__(self, title: str, columns: list, style: str = "cyan"):
         self.table = Table(title=title)
@@ -126,7 +129,7 @@ class TableDisplay:
     def show(self):
         console.print(self.table)
 
-# Prompt taking utilities
+# Logic for user input and prompts
 class PromptTaker:
 
     @staticmethod
@@ -206,3 +209,18 @@ class PromptTaker:
             bool(re.search(r"\d", pwd)) and
             bool(re.search(r"[!@#$%^&*(),.?\":{}|<>]", pwd))
         )
+
+# Documentation rendering logic
+def print_markdown(path: str, pager: bool = False):
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Documentation not found at {path}")
+    
+    with open(path, "r", encoding="utf-8") as f:
+        md_content = f.read()
+    
+    if pager:
+        with console.pager(styles=True):
+            console.print(Markdown(md_content), width=console.size.width)
+    else:
+        console.print(Markdown(md_content))

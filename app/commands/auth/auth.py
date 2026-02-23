@@ -2,17 +2,35 @@ from typer import Typer, Argument, Option
 
 from app.utils import TextDisplay, authManager
 
-
+# Typer app for authentication
 auth = Typer(
     name="auth",
     help="Manage authentication requests and tokens",
     no_args_is_help=True
 )
 
+@auth.callback(
+    epilog="""
+    EXAMPLES\n
+    pycurl auth login ...\n
+    pycurl auth register ...\n
+    """
+)
+def auth_callback():
+    """
+    Manage authentication requests and tokens
+    """
+    pass
+
 # pycurl auth login ...
 @auth.command(
     name="login",
-    short_help="Perform login and store authentication token"
+    short_help="Perform login and store authentication token",
+    epilog="""
+    EXAMPLES\n
+    pycurl auth login https://api.example.com/login -j '{"u": "user", "p": "pass"}' --save-alias mytoken\n
+    pycurl auth login https://api.example.com/login -j @login.json -t "access_token"\n
+    """
 )
 def login(
     url: str = Argument(..., help="The URL to send the login request to"),
@@ -24,7 +42,9 @@ def login(
     cookie_token: str | None = Option(None, "--cookie-token", help="Key of the cookie to extract the token from"),
     save_alias: str | None = Option(None, "-a", "--save-alias", help="Save the token to the default config with this alias")
 ):
-    """Perform a login request to obtain and store an authentication token."""
+    """
+    Perform a login request to obtain and store an authentication token.
+    """
     try:
         authManager(
             url=url,
@@ -45,7 +65,11 @@ def login(
 # pycurl auth register ...
 @auth.command(
     name="register",
-    short_help="Perform registration and store authentication token"
+    short_help="Perform registration and store authentication token",
+    epilog="""
+    EXAMPLES\n
+    pycurl auth register https://api.example.com/register -j @user.json --save-alias newuser\n
+    """
 )
 def register(
     url: str = Argument(..., help="The URL to send the registration request to"),
@@ -57,7 +81,9 @@ def register(
     cookie_token: str | None = Option(None, "--cookie-token", help="Key of the cookie to extract the token from"),
     save_alias: str | None = Option(None, "-a", "--save-alias", help="Save the token to the default config with this alias")
 ):
-    """Perform a registration request to obtain and store an authentication token."""
+    """
+    Perform a registration request to obtain and store an authentication token.
+    """
     try:
         authManager(
             url=url,

@@ -17,4 +17,18 @@ from .auth.auth import auth
 # Token Management
 from .token.token import token
 
-__all__ = ["init", "config", "get", "post", "put", "patch", "delete", "auth", "token"]
+# Documentation
+from .docs.docs import docs
+
+__all__ = [
+    "init", 
+    "config", 
+    "get", 
+    "post", 
+    "put", 
+    "patch", 
+    "delete", 
+    "auth", 
+    "token", 
+    "docs"
+]

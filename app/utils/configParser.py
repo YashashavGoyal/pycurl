@@ -4,9 +4,12 @@ import json
 # Default Config Path
 CONFIG_PATH = Path.home() / ".pycurl" / "config.json"
 
-# Default Config Template
-DEFAULT_TOKEN_PATH = Path.home()/".pycurl/tokens"
+# Default Token Path
+DEFAULT_TOKEN_PATH = Path.home() / ".pycurl" / "tokens"
+
+# Fetch default config template
 def getDefaultConfig(token_file:Path = DEFAULT_TOKEN_PATH, token_type:str = "Bearer", default_token:str|None = None) -> dict:
+    """Returns the default configuration template."""
     DEFAULT_CONFIG_TEMPLATE = {
         "auth": {
             "token_file": str(token_file),
@@ -18,17 +21,21 @@ def getDefaultConfig(token_file:Path = DEFAULT_TOKEN_PATH, token_type:str = "Bea
 
 # Error classes for Config Exception
 class ConfigError(Exception):
+    """Base exception for configuration errors."""
     pass
 
 class ConfigNotFound(ConfigError):
+    """Exception raised when the configuration file is not found."""
     pass
 
 class InvalidConfig(ConfigError):
+    """Exception raised when the configuration file is invalid."""
     pass
 
 
-# Load and return the configuration data
+# Configuration loading logic
 def loadConfig(config_path: Path) -> dict:
+    """Loads and returns the configuration data."""
     if not config_path.exists():
         raise ConfigNotFound(f"Config not found at {config_path}")
     try:
@@ -40,10 +47,11 @@ def loadConfig(config_path: Path) -> dict:
 
 # Validates the syntax and fields of config file
 def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
+    """Validates the syntax and fields of the configuration data."""
     errors = []
     auth = config_data.get("auth")
 
-    # checking auth
+    # checking auth section
     if not isinstance(auth, dict):
         return False, [InvalidConfig("Missing or invalid 'auth' section")]
 
@@ -54,17 +62,17 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
     if extra_keys:
         errors.append(InvalidConfig(f"Unknown sections: {', '.join(extra_keys)}"))
 
-    # Validate token_file
+    # Validate token_file field
     token_file = auth.get("token_file")
     if not isinstance(token_file, str) or not token_file.strip():
         errors.append(InvalidConfig("'auth.token_file' must be a non-empty string"))
     
-    # Validate token_type
+    # Validate token_type field
     token_type = auth.get("token_type")
     if not isinstance(token_type, str):
         errors.append(InvalidConfig("'auth.token_type' must be a string (can be empty)"))
 
-    # Validate default_token
+    # Validate default_token field
     default_token = auth.get("default_token")
     if default_token is not None:
         if not isinstance(default_token, str):
@@ -72,7 +80,7 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
         elif ":" in default_token:
             errors.append(InvalidConfig("'auth.default_token' cannot contain ':'"))
 
-    # Check for unexpected keys inside auth
+    # Check for unexpected keys inside auth section
     allowed_auth_keys = {"token_file", "token_type", "default_token"}
     extra_auth = set(auth.keys()) - allowed_auth_keys
     if extra_auth:
@@ -83,6 +91,7 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
 # For Future Use
 # load + Validate
 def loadAndValidateConfig(config_path) -> dict:
+    """Loads and validates the configuration data."""
     config_data = loadConfig(config_path)
     isValid, errors = configValidator(config_data=config_data)
     
@@ -93,19 +102,23 @@ def loadAndValidateConfig(config_path) -> dict:
 
 # Implement token path resolution logic here
 def tokenPathResolver(config_data: dict) -> Path:
+    """Resolves the absolute path to the token file."""
     raw_path = config_data["auth"]["token_file"]
     return Path(raw_path).expanduser().resolve()
 
 # Implement token type resolution logic here
 def tokenTypeResolver(config_data: dict) -> str:
+    """Returns the token type from configuration."""
     return config_data.get("auth", {}).get("token_type", "")
 
 # Implement default token resolution logic here
 def defaultTokenResolver(config_data: dict) -> str | None:
+    """Returns the default token from configuration."""
     return config_data["auth"].get("default_token")
 
 # Implement attribute extraction logic here
 def extractConfigAttributes(config_data: dict) -> tuple[Path, str, str | None]:
+    """Extracts all core configuration attributes."""
     return (
         tokenPathResolver(config_data),
         tokenTypeResolver(config_data),

@@ -11,15 +11,17 @@ from app.utils import (
     ConfigError
 )
 
-
+# pycurl token list
 def list_tokens(
-    alias: str = Argument(None, help="Token alias")
+    alias: str = Argument(None, help="Token alias name")
 ):
+    """List specific tokens by alias or all available tokens."""
     try:
         config = loadAndValidateConfig(CONFIG_PATH)
         token_file, _, default = extractConfigAttributes(config)
         tokens = parse_token_file(token_file)
         
+        # Handle default alias resolution
         if alias == "default":
             if not default:
                 raise ConfigError("Default alias is not set. use [blue]pycurl config generate --modify[/blue] to set")

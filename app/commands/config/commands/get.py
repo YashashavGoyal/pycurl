@@ -7,7 +7,7 @@ from app.utils import (
     InvalidConfig
 )
 
-
+# pycurl config get
 def get(
     key: str = Argument(..., help="Enter key you want to see as [bold]Referenced from auth[/bold] using [cyan].[/cyan]")
 ):
@@ -24,15 +24,14 @@ def get(
         TextDisplay.style_text(f"[blue]{key}[/blue] = {value}", style="white")
 
     except InvalidConfig:
-        ERROR = (
+        error_msg = (
             "[red]Configuration is invalid[/red]\n"
             "\t - Use [cyan]pycurl config validate[/cyan] to check errors\n"
             "\t - Use [cyan]pycurl config generate[/cyan] to generate new config\n"
             "\t - Or simply run [cyan]pycurl init -o[/cyan] overwrite existing config"
         )
-        TextDisplay.style_text(ERROR, style="white")
+        TextDisplay.style_text(error_msg, style="white")
         raise SystemExit(1)
 
     except Exception as e:
-        TextDisplay.error_text(f"Error Occured: {e}")
-
+        TextDisplay.error_text(f"Error: {e}")

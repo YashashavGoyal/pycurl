@@ -10,8 +10,7 @@ from .tokenParser import (
     saveTokenToDefaultConfig
 )
 
-
-# Authentication Logic for auth login / register
+# Authentication logic for auth login / register commands
 def authManager(
     *,
     url: str,
@@ -24,12 +23,13 @@ def authManager(
     cookie_token: str | None = None,
     save_alias: str | None = None
 ) -> tuple[requests.Response, str | None]:
-    
-    """Authenticate a user by sending a POST request to the specified URL with JSON data."""
-
+    """
+    Authenticate a user by sending a POST request to the specified URL with JSON data.
+    """
     try:
         headers = {"Content-Type": "application/json"}
 
+        # Handle payload input (direct JSON or file)
         if json_data.strip().startswith("@"):
             file_path = json_data.strip()[1:]
             with open(file_path, "r", encoding="utf-8") as f:
@@ -37,6 +37,7 @@ def authManager(
         else:
             payload = json.loads(json_data)
 
+        # Send authentication request
         response = requests.post(url, json=payload, headers=headers)
 
         try:
@@ -44,6 +45,7 @@ def authManager(
         except ValueError:
             response_json = {"message": response.text}
 
+        # Handle request failure
         if response.status_code >= 400:
             TextDisplay.error_text(
                 response_json.get("message", "Authentication failed")
@@ -51,13 +53,15 @@ def authManager(
             TextDisplay.print_json(response_json)
             raise SystemExit(response.status_code)
 
+        # Success messages
         TextDisplay.style_text(success_msg, style="white")
         TextDisplay.success_text(f"Status Code: {response.status_code}")
 
-
+        # Save response if requested
         if save_to_file:
             saveResponseToFile(response, save_to_file, "json")
 
+        # Display content if requested
         if show_content:
             TextDisplay.info_text("Response Content:", style="white")
             try:
@@ -65,6 +69,7 @@ def authManager(
             except ValueError:
                 print(response.text)
 
+        # Handle token storage logic
         token: str | None = None
         if store_token_to_file or save_alias:
             if cookie_token:
@@ -92,7 +97,8 @@ def authManager(
 
     except Exception as ex:
         raise SystemExit(TextDisplay.error_text(f"An error occurred: {ex}"))
-    
+
+# Token extraction logic
 def getAuthTokenFromResponse(
     response: requests.Response,
     token_field: str = "token"
@@ -112,4 +118,3 @@ def getAuthTokenFromResponse(
 
     except Exception as e:
         raise SystemExit(TextDisplay.error_text(f"Error extracting token: {e}"))
-

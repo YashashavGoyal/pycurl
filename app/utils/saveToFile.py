@@ -5,7 +5,7 @@ from app.utils import TextDisplay
 
 # Helper function to save response to file
 def saveResponseToFile(response: requests.Response, file_path: str, format: str = "json"):
-    """Save the response content to a file."""
+    """Save the response content to a file in either JSON or raw format."""
 
     try:
         if format not in ["json", "raw"]:
@@ -13,14 +13,12 @@ def saveResponseToFile(response: requests.Response, file_path: str, format: str 
 
         with open(file_path, "w", encoding="utf-8") as f:
             if format == "json":
-
                 if 'application/json' not in response.headers.get('Content-Type', ''):
                     raise ValueError("Response content is not in JSON format.")
-
                 json.dump(response.json(), f, indent=4)
             else:
                 f.write(response.text)
-
+        
         TextDisplay.success_text(f"Response saved to {file_path}", style="white")
     
     except ValueError as ve:

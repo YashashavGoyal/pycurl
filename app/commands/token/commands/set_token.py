@@ -9,22 +9,27 @@ from app.utils import (
     alias_validator
 )
 
+# pycurl token set
 def set_token(
-    token: str = Argument(..., help="Give the token string"),
-    alias: str = Option(..., "-a", "--alias", help="Give the alias name for this token")
+    token: str = Argument(..., help="Token string to save"),
+    alias: str = Option(..., "-a", "--alias", help="Alias for this token")
 ):
+    """Add a new token or update an existing one in the token file."""
     try:
         config = loadAndValidateConfig(config_path=CONFIG_PATH)
         token_file_path = tokenPathResolver(config_data=config)
 
+        # Handle token file existence
         if not token_file_path.exists():
             TextDisplay.warn_text(f"Token file not found at {token_file_path}\n[yellow]Creating File...[/yellow]")
             token_file_path.parent.mkdir(parents=True, exist_ok=True)
             token_file_path.touch()
 
+        # Validate alias format
         if alias and not alias_validator(alias):
             raise ValueError("Invalid alias format")
 
+        # Read existing file
         with open(token_file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
@@ -52,12 +57,14 @@ def set_token(
             else:
                 new_lines.append(line)
 
+        # Append if new alias
         if not found:
             # Ensure we start on a new line if the file doesn't end with one
             if new_lines and not new_lines[-1].endswith("\n"):
                 new_lines[-1] += "\n"
             new_lines.append(new_token_line)
 
+        # Write updates
         with open(token_file_path, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
 
@@ -71,4 +78,4 @@ def set_token(
     except ValueError as ve:
         TextDisplay.error_text(str(ve))
     except Exception as e:
-        TextDisplay.error_text(str(e))
+        TextDisplay.error_text(f"Error: {e}")

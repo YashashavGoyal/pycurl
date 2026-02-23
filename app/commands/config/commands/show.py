@@ -9,7 +9,7 @@ from app.utils import (
     InvalidConfig
 )
 
-
+# pycurl config show
 def show(
     format: str = Option("human", "-f", "--format", help="Format to show the config file (json or human)")
 ):
@@ -31,18 +31,18 @@ def show(
 
             TextDisplay.style_text(Config, style="white")
 
-        if format == "json":
+        elif format == "json":
             TextDisplay.print_json(config_data)
 
     except InvalidConfig:
-        ERROR = (
-                "[red]Configuration is invalid[/red]\n"
-                "\t - Use [cyan]pycurl config validate[/cyan] to check errors\n"
-                "\t - Use [cyan]pycurl config generate[/cyan] to generate new config\n"
-                "\t - Or simply run [cyan]pycurl init -o[/cyan] overwrite existing config"
-            )
-        TextDisplay.style_text(ERROR, style="white")
+        error_msg = (
+            "[red]Configuration is invalid[/red]\n"
+            "\t - Use [cyan]pycurl config validate[/cyan] to check errors\n"
+            "\t - Use [cyan]pycurl config generate[/cyan] to generate new config\n"
+            "\t - Or simply run [cyan]pycurl init -o[/cyan] overwrite existing config"
+        )
+        TextDisplay.style_text(error_msg, style="white")
         raise SystemExit(1)
 
     except ConfigError as ce:
-        TextDisplay.error_text(f"{ce}")
+        TextDisplay.error_text(f"Error: {ce}")

@@ -3,7 +3,8 @@ from .ui import (
     TextDisplay, 
     PanelDisplay, 
     TableDisplay, 
-    PromptTaker
+    PromptTaker,
+    print_markdown
 )
 
 # Save to file
@@ -13,6 +14,7 @@ from .saveRequest import saveRequestResponse
 # Auth logic
 from .authUtils import authManager
 
+# Config and Token Parsing
 from .configParser import (
     # Absolute Path for config dir
     CONFIG_PATH,
@@ -46,6 +48,7 @@ __all__ = [
     "PanelDisplay",
     "TableDisplay",
     "PromptTaker",
+    "print_markdown",
     "saveResponseToFile",
     "saveRequestResponse",
     "authManager",

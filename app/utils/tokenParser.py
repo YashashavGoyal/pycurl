@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import Dict
 
 from .configParser import (
+    CONFIG_PATH,
     loadAndValidateConfig, 
-    extractConfigAttributes,
-    InvalidConfig, 
+    extractConfigAttributes, 
+    InvalidConfig
 )
 
 
@@ -23,7 +24,7 @@ def parse_token_file(token_file: Path) -> Dict[str, str]:
             # Ignore comments & empty lines
             if not line or line.startswith("#"):
                 continue
-
+            
             if ":" not in line:
                 raise InvalidConfig(
                     f"Invalid token format at line {lineno}: {line}"
@@ -45,11 +46,11 @@ def parse_token_file(token_file: Path) -> Dict[str, str]:
                 )
 
             tokens[alias] = token
-
+    
     return tokens
 
 # Resolve token alias into actual token
-def resolve_token(alias: str = "", config_path: Path = None) -> str:
+def resolve_token(alias: str = "", config_path: Path = CONFIG_PATH) -> str:
     config = loadAndValidateConfig(config_path)
     token_file, _, default_token = extractConfigAttributes(config)
 
@@ -79,7 +80,7 @@ def alias_validator(alias: str) -> bool:
         return False
     return True
 
-def getSavedToken(alias: str, config_path: Path = None) -> tuple[str, dict]:
+def getSavedToken(alias: str, config_path: Path = CONFIG_PATH) -> tuple[str, dict]:
     config = loadAndValidateConfig(config_path)
     token_file, token_type, default_token = extractConfigAttributes(config)
     tokens = parse_token_file(token_file)
@@ -123,10 +124,9 @@ def saveTokenToDefaultConfig(token: str, alias: str):
 
     try:
         # Load config to find the token file path
-        from app.utils import CONFIG_PATH
         config = loadAndValidateConfig(CONFIG_PATH) # using default global path
         token_file, _, _ = extractConfigAttributes(config)
-        
+
         # Ensure directory exists
         token_file.parent.mkdir(parents=True, exist_ok=True)
         
@@ -154,9 +154,9 @@ def saveTokenToDefaultConfig(token: str, alias: str):
         
         if not updated:
             new_lines.append(f"{alias}: {token}\n")
-            
+
         with open(token_file, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
-            
+
     except Exception as e:
         raise RuntimeError(f"Error saving token to default config: {e}")

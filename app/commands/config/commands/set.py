@@ -10,12 +10,12 @@ from app.utils import (
     ConfigError,
 )
 
-
+# pycurl config set
 def set_conf(
     key: str = Argument(..., help="Enter key you want to update as [bold]Referenced from auth[/bold] using [cyan].[/cyan]"),
     value: str = Argument("", help="Enter the value you want to update for given key")
 ):
-    "Recommended when you want to update any single key in config file as per your requirement"
+    """Recommended when you want to update any single key in config file as per your requirement"""
 
     try:
         if not key:
@@ -43,26 +43,28 @@ def set_conf(
                 value = str(value)
 
             except Exception as e:
-                raise(e)
+                raise e
 
+        # Traverse and set value
         target = config_data
         for p in parts[:-1]:
             target = target.setdefault(p, {})
 
         target[parts[-1]] = value
 
-        # Validate before savin
+        # Validate before saving
         valid, errors = configValidator(config_data)
         if not valid:
             for e in errors:
                 TextDisplay.error_text(str(e))
             raise SystemExit(1)
 
+        # Save to file
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(config_data, f, indent=4)
 
-        TextDisplay.success_text("Configuration updated")
+        TextDisplay.success_text("Configuration updated successfully.")
 
     except ConfigError as ce:
         TextDisplay.error_text(str(ce))
