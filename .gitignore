@@ -13,7 +13,8 @@ dist/
 *.egg-info/
 
 # PyInstaller (future use)
-*.spec
+# *.spec
+# commenting out for now as it is not needed because we need to bundle the docs file
 
 # Logs
 *.log
