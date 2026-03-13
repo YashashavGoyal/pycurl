@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
 
+from .ui import TextDisplay
+
 # Default Config Path
 CONFIG_PATH = Path.home() / ".pycurl" / "config.json"
 
@@ -36,23 +38,31 @@ class InvalidConfig(ConfigError):
 # Configuration loading logic
 def loadConfig(config_path: Path) -> dict:
     """Loads and returns the configuration data."""
+    TextDisplay.debug_text(f"Attempting to load config from: {config_path}")
     if not config_path.exists():
+        TextDisplay.debug_text(f"Config file not found: {config_path}")
         raise ConfigNotFound(f"Config not found at {config_path}")
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+            TextDisplay.debug_text(f"Successfully loaded config from: {config_path}")
+            return data
 
     except json.JSONDecodeError as e:
+        TextDisplay.debug_text(f"Failed to parse JSON in {config_path}: {e}")
         raise InvalidConfig(f"Invalid JSON in {config_path}") from e
 
 # Validates the syntax and fields of config file
 def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
     """Validates the syntax and fields of the configuration data."""
+
+    TextDisplay.debug_text("Validating configuration data...")
     errors = []
     auth = config_data.get("auth")
 
     # checking auth section
     if not isinstance(auth, dict):
+        TextDisplay.debug_text("Validation failed: Missing or invalid 'auth' section")
         return False, [InvalidConfig("Missing or invalid 'auth' section")]
 
     # Check for unexpected top-level keys
@@ -60,7 +70,9 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
     actual_keys = set(config_data.keys())
     extra_keys = actual_keys - allowed_top_keys
     if extra_keys:
-        errors.append(InvalidConfig(f"Unknown sections: {', '.join(extra_keys)}"))
+        msg = f"Unknown sections: {', '.join(extra_keys)}"
+        TextDisplay.debug_text(f"Validation warning: {msg}")
+        errors.append(InvalidConfig(msg))
 
     # Validate token_file field
     token_file = auth.get("token_file")
@@ -84,7 +96,14 @@ def configValidator(config_data: dict) -> tuple[bool, list[ConfigError]]:
     allowed_auth_keys = {"token_file", "token_type", "default_token"}
     extra_auth = set(auth.keys()) - allowed_auth_keys
     if extra_auth:
-        errors.append(InvalidConfig(f"Unknown keys in 'auth': {', '.join(extra_auth)}"))
+        msg = f"Unknown keys in 'auth': {', '.join(extra_auth)}"
+        TextDisplay.debug_text(f"Validation warning: {msg}")
+        errors.append(InvalidConfig(msg))
+
+    if not errors:
+        TextDisplay.debug_text("Configuration validation successful")
+    else:
+        TextDisplay.debug_text(f"Configuration validation found {len(errors)} issues")
 
     return len(errors) == 0, errors
 

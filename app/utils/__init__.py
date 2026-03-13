@@ -1,10 +1,12 @@
 # UI classes for Display
 from .ui import (
+    GlobalMode,
+    set_modes,
     TextDisplay, 
     PanelDisplay, 
     TableDisplay, 
     PromptTaker,
-    print_markdown
+    print_markdown,
 )
 
 # Save to file
@@ -44,6 +46,8 @@ from .tokenParser import (
 )
 
 __all__ = [
+    "GlobalMode",
+    "set_modes",
     "TextDisplay",
     "PanelDisplay",
     "TableDisplay",

@@ -31,26 +31,42 @@ def get(
         # Handle authenticated requests
         request_cookies = {}
         if user_saved_requests:
+            TextDisplay.debug_text(f"User requested token alias: '{user_saved_requests}'")
             token, token_headers = getSavedToken(user_saved_requests)
             if token_placement.lower() == "header":
                 headers.update(token_headers)
+                TextDisplay.debug_text("Token attached to headers")
             elif token_placement.lower() == "cookie":
                 request_cookies[token_cookie_name] = token
+                TextDisplay.debug_text(f"Token attached to cookie: '{token_cookie_name}'")
             else:
                  TextDisplay.warn_text(f"Unknown token placement '{token_placement}', defaulting to header.")
                  headers.update(token_headers)
         
+        TextDisplay.debug_text(f"Initiating GET request to: {url}")
+        TextDisplay.debug_text(f"Request Headers: {headers}")
+        if request_cookies:
+            TextDisplay.debug_text(f"Request Cookies: {request_cookies}")
+
         response = requests.get(url, headers=headers, cookies=request_cookies)
+        
+        TextDisplay.debug_text(f"Response status: {response.status_code}")
+        TextDisplay.debug_text(f"Response time: {response.elapsed.total_seconds():.3f}s")
+        TextDisplay.debug_text(f"Response Headers: {dict(response.headers)}")
 
         # Handle failed requests
         if response.status_code >= 400:
             try:
                 response_json = response.json()
-                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
-                TextDisplay.print_json(response_json)
             except ValueError:
-                TextDisplay.error_text(f"Request failed with status code: {response.status_code}")
-                print(response.text)
+                response_json = {"raw_response": response.text}
+            
+            TextDisplay.psa_error(
+                problem=f"Request failed with status code: {response.status_code}",
+                source=f"GET {url}",
+                action="Check the URL and headers. The service might be offline or requiring different credentials."
+            )
+            TextDisplay.print_json(response_json, is_result=True)
             raise SystemExit(response.status_code) 
 
         # Success message
@@ -61,7 +77,7 @@ def get(
         if show_content:
             TextDisplay.info_text("Response Content:", style="white")
             try:
-                TextDisplay.print_json(response.json())
+                TextDisplay.print_json(response.json(), is_result=True)
             except ValueError:
                 print(response.text)
 
@@ -85,7 +101,12 @@ def get(
                     if isinstance(response.request.body, bytes)
                     else response.request.body
                 ) if response.request.body else None
-            })
+            }, is_result=False)
 
     except requests.exceptions.RequestException as e:
-        raise SystemExit(TextDisplay.error_text(f"Error during GET request: {e}"))
+        TextDisplay.psa_error(
+            problem=f"Error during GET request: {e}",
+            source="Requests Library",
+            action="Verify your network connection and the URL format."
+        )
+        raise SystemExit(1)

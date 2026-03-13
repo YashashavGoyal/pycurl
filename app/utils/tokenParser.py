@@ -7,12 +7,14 @@ from .configParser import (
     extractConfigAttributes, 
     InvalidConfig
 )
+from .ui import TextDisplay
 
 
 # Parse token alias file into {alias: token}
 def parse_token_file(token_file: Path) -> Dict[str, str]:
-
+    TextDisplay.debug_text(f"Parsing token file: {token_file}")
     if not token_file.exists():
+        TextDisplay.debug_text(f"Token file not found: {token_file}")
         raise InvalidConfig(f"Token file not found at {token_file}")
 
     tokens: Dict[str, str] = {}
@@ -47,10 +49,12 @@ def parse_token_file(token_file: Path) -> Dict[str, str]:
 
             tokens[alias] = token
     
+    TextDisplay.debug_text(f"Successfully parsed {len(tokens)} tokens from {token_file}")
     return tokens
 
 # Resolve token alias into actual token
 def resolve_token(alias: str = "", config_path: Path = CONFIG_PATH) -> str:
+    TextDisplay.debug_text(f"Resolving token for alias: '{alias}'")
     config = loadAndValidateConfig(config_path)
     token_file, _, default_token = extractConfigAttributes(config)
 
@@ -59,15 +63,20 @@ def resolve_token(alias: str = "", config_path: Path = CONFIG_PATH) -> str:
     # If alias explicitly provided
     if alias and alias != "default":
         if alias not in tokens:
+            TextDisplay.debug_text(f"Alias '{alias}' not found in {token_file}")
             raise InvalidConfig(f"Token alias '{alias}' not found")
+        TextDisplay.debug_text(f"Resolved alias '{alias}' to token")
         return tokens[alias]
 
     # Fallback to default token
     if default_token and alias == "default":
+        TextDisplay.debug_text(f"Falling back to default token alias: '{default_token}'")
         if default_token not in tokens:
+            TextDisplay.debug_text(f"Default alias '{default_token}' not found in {token_file}")
             raise InvalidConfig(
                 f"Default token alias '{default_token}' not found"
             )
+        TextDisplay.debug_text(f"Resolved default alias '{default_token}' to token")
         return tokens[default_token]
 
     raise InvalidConfig(
@@ -81,6 +90,7 @@ def alias_validator(alias: str) -> bool:
     return True
 
 def getSavedToken(alias: str, config_path: Path = CONFIG_PATH) -> tuple[str, dict]:
+    TextDisplay.debug_text(f"Fetching saved token for alias: '{alias}'")
     config = loadAndValidateConfig(config_path)
     token_file, token_type, default_token = extractConfigAttributes(config)
     tokens = parse_token_file(token_file)
@@ -88,15 +98,19 @@ def getSavedToken(alias: str, config_path: Path = CONFIG_PATH) -> tuple[str, dic
     headers = {}
 
     if alias == "default":
+        TextDisplay.debug_text(f"Using default token alias: '{default_token}'")
         if default_token not in tokens:
             raise InvalidConfig(f"Default token alias '{default_token}' not found in token file")
         headers["Authorization"] = f"{token_type} {tokens[default_token]}"
+        TextDisplay.debug_text(f"Resolved default token with type '{token_type}'")
         return tokens[default_token], headers
 
     if alias not in tokens:
+        TextDisplay.debug_text(f"Alias '{alias}' not found in {token_file}")
         raise InvalidConfig(f"Token alias '{alias}' not found")
 
     headers["Authorization"] = f"{token_type} {tokens[alias]}"
+    TextDisplay.debug_text(f"Resolved alias '{alias}' with type '{token_type}'")
     return tokens[alias], headers
 
 

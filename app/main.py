@@ -1,8 +1,10 @@
-from typer import Typer
+import os
+from typing import Optional
+from typer import Typer, Option, Context, Exit
 
 from app.commands import init, config, get, post, put, patch, delete, auth, token, docs
 from app.commands.docs.commands import workflow_docs
-from app.utils import PanelDisplay, TextDisplay
+from app.utils import PanelDisplay, TextDisplay, set_modes
 
 # Typer app instance
 app = Typer(
@@ -10,6 +12,65 @@ app = Typer(
     help="A lightweight curl-like CLI tool written in Python using requests",
     no_args_is_help=True
 )
+
+app_version = "1.2.0"
+
+def version_callback(value: bool):
+    if value:
+        TextDisplay.style_text(f"✔ PyCurl version: {app_version}", style="white")
+        raise Exit()
+
+@app.callback()
+def global_callback(
+    ctx: Context,
+    verbose: bool = Option(False, "--verbose", help="Show detailed DEBUG logs"),
+    quiet: bool = Option(
+        False, "--quiet", "-q", 
+        help="Minimize output (errors only)",
+        envvar="CLIMON_QUIET"
+    ),
+    json_mode: bool = Option(
+        False, "--json", "-j", 
+        help="Output result in pure JSON format",
+        envvar="CLIMON_JSON"
+    ),
+    no_color: bool = Option(
+        False, "--no-color", 
+        help="Disable colored output",
+        envvar="CLIMON_NO_COLOR"
+    ),
+    version: Optional[bool] = Option(
+        None, "--version", "-v", 
+        callback=version_callback,
+        is_eager=True,
+        help="Show CLI version"
+    )
+):
+    """
+    Global options for pycurl.
+    """
+    # Determine effective mode settings, considering both flags and environment variables
+    cur_quiet = quiet or os.environ.get("CLIMON_QUIET") == "1"
+    cur_json = json_mode or os.environ.get("CLIMON_JSON") == "1"
+    cur_no_color = no_color or os.environ.get("CLIMON_NO_COLOR") == "1"
+
+    # Log which global modes are being enabled based on flags and env vars
+    if cur_no_color:
+        TextDisplay.debug_text("Global Mode: NO_COLOR enabled")
+    if verbose:
+        TextDisplay.debug_text("Global Mode: VERBOSE enabled")
+    if cur_quiet:
+        TextDisplay.debug_text("Global Mode: QUIET enabled")
+    if cur_json:
+        TextDisplay.debug_text("Global Mode: JSON enabled")
+
+    # Applying mode settings
+    set_modes(
+        quiet=cur_quiet,
+        verbose=verbose,
+        json=cur_json,
+        no_color=cur_no_color
+    )
 
 # Registering subcommands
 
@@ -119,7 +180,7 @@ app.command(
 )
 def version():
     """Show the version of PyCurl"""
-    TextDisplay.style_text("PyCurl version: 1.1.1", style="white")
+    TextDisplay.style_text(f"PyCurl version: {app_version}", style="white")
 
 # pycurl about
 @app.command(
@@ -136,7 +197,7 @@ def about():
       "About PyCurl", 
       "PyCurl is a lightweight curl-like CLI tool written in Python using requests.", 
       border_style="cyan", 
-      subtitle="Version 1.1.1"
+      subtitle=f"Version {app_version}"
     )
 
 

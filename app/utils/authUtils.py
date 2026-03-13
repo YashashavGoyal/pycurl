@@ -32,26 +32,32 @@ def authManager(
         # Handle payload input (direct JSON or file)
         if json_data.strip().startswith("@"):
             file_path = json_data.strip()[1:]
+            TextDisplay.debug_text(f"Reading auth payload from file: {file_path}")
             with open(file_path, "r", encoding="utf-8") as f:
                 payload = json.load(f)
         else:
+            TextDisplay.debug_text("Parsing inline JSON auth payload")
             payload = json.loads(json_data)
 
         # Send authentication request
+        TextDisplay.debug_text(f"Sending POST request to: {url}")
+        TextDisplay.debug_text(f"Headers: {headers}")
         response = requests.post(url, json=payload, headers=headers)
+        TextDisplay.debug_text(f"Response received in {response.elapsed.total_seconds():.3f}s")
 
         try:
             response_json = response.json()
         except ValueError:
+            TextDisplay.debug_text("Response body is not valid JSON")
             response_json = {"message": response.text}
 
         # Handle request failure
         if response.status_code >= 400:
+            TextDisplay.debug_text(f"Authentication failed with status {response.status_code}")
             TextDisplay.error_text(
                 response_json.get("message", "Authentication failed")
             )
-            TextDisplay.print_json(response_json)
-            raise SystemExit(response.status_code)
+            return response, None 
 
         # Success messages
         TextDisplay.style_text(success_msg, style="white")
@@ -73,10 +79,12 @@ def authManager(
         token: str | None = None
         if store_token_to_file or save_alias:
             if cookie_token:
+                TextDisplay.debug_text(f"Extracting token from cookie: '{cookie_token}'")
                 token = response.cookies.get(cookie_token)
                 if not token:
                     TextDisplay.warn_text(f"Token cookie '{cookie_token}' not found in response.")
             else:
+                TextDisplay.debug_text(f"Extracting token from JSON field: '{token_field}'")
                 token = getAuthTokenFromResponse(response, token_field)
             
             if store_token_to_file:
