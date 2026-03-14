@@ -13,7 +13,7 @@ app = Typer(
     no_args_is_help=True
 )
 
-app_version = "1.2.0"
+app_version = "1.2.1"
 
 def version_callback(value: bool):
     if value:

@@ -1,5 +1,7 @@
 # UI classes for Display
 from .ui import (
+    PSAException,
+    psa_error_handler,
     GlobalMode,
     set_modes,
     TextDisplay, 
@@ -46,6 +48,8 @@ from .tokenParser import (
 )
 
 __all__ = [
+    "PSAException",
+    "psa_error_handler",
     "GlobalMode",
     "set_modes",
     "TextDisplay",

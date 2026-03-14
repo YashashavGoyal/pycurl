@@ -11,9 +11,40 @@ from pathlib import Path
 from typing import Callable, List
 import re
 
+from functools import wraps
+import sys
+
 # Central Console instance
 console = Console()
 error_console = Console(stderr=True)
+
+class PSAException(Exception):
+    """Exception class for PSA (Problem-Source-Action) errors."""
+    def __init__(self, problem: str, source: str = None, action: str = None, exit_code: int = 1):
+        self.problem = problem
+        self.source = source
+        self.action = action
+        self.exit_code = exit_code
+        super().__init__(self.problem)
+
+def psa_error_handler(func):
+    """Decorator to catch PSAException and other exceptions to display them in PSA format."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except PSAException as e:
+            TextDisplay.psa_error(problem=e.problem, source=e.source, action=e.action)
+            raise sys.exit(e.exit_code)
+        except Exception as e:
+            # Catch-all for unexpected errors, converted to PSA format
+            TextDisplay.psa_error(
+                problem=str(e),
+                source="Unexpected Error",
+                action="Please report this issue if it persists."
+            )
+            raise sys.exit(1)
+    return wrapper
 
 class GlobalMode:
     QUIET = False
@@ -112,9 +143,11 @@ class TextDisplay:
         if action:
             msg += f"\nSuggestion: {action}"
         
-        style = f"bold {TextDisplay.ERROR}"
-        con = error_console if GlobalMode.JSON else console
-        con.print(Panel(msg, title="✖ Error", border_style=TextDisplay.ERROR))
+        if GlobalMode.JSON:
+            # In JSON mode, write to stderr
+            error_console.print(msg, style=f"bold {TextDisplay.ERROR}")
+        else:
+            console.print(Panel(msg, title="✖ Error", border_style=TextDisplay.ERROR))
 
 # Panel display utilities
 class PanelDisplay:

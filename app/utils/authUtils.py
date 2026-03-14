@@ -1,7 +1,7 @@
 import requests
 import json
 
-from .ui import TextDisplay
+from .ui import TextDisplay, PSAException
 from .saveToFile import saveResponseToFile
 from .configParser import loadAndValidateConfig, extractConfigAttributes
 from .tokenParser import (
@@ -54,10 +54,12 @@ def authManager(
         # Handle request failure
         if response.status_code >= 400:
             TextDisplay.debug_text(f"Authentication failed with status {response.status_code}")
-            TextDisplay.error_text(
-                response_json.get("message", "Authentication failed")
+            raise PSAException(
+                problem=response_json.get("message", "Authentication failed"),
+                source=f"POST {url}",
+                action="Check your credentials and the URL. The service might be offline or requiring different credentials.",
+                exit_code=response.status_code
             )
-            return response, None 
 
         # Success messages
         TextDisplay.style_text(success_msg, style="white")
@@ -98,13 +100,27 @@ def authManager(
         return response, token
 
     except requests.exceptions.RequestException as e:
-        raise SystemExit(TextDisplay.error_text(f"Error during authentication request: {e}"))
+        raise PSAException(
+            problem=f"Error during authentication request: {e}",
+            source="Requests Library",
+            action="Verify your network connection and the URL format."
+        )
 
     except json.JSONDecodeError as jde:
-        raise SystemExit(TextDisplay.error_text(f"Invalid JSON data: {jde}"))
+        raise PSAException(
+            problem=f"Invalid JSON data: {jde}",
+            source="JSON Decoder",
+            action="Check the format of your --json payload."
+        )
 
     except Exception as ex:
-        raise SystemExit(TextDisplay.error_text(f"An error occurred: {ex}"))
+        if isinstance(ex, PSAException):
+            raise ex
+        raise PSAException(
+            problem=f"An error occurred: {ex}",
+            source="Authentication Logic",
+            action="Please report this issue if it persists."
+        )
 
 # Token extraction logic
 def getAuthTokenFromResponse(
@@ -117,12 +133,17 @@ def getAuthTokenFromResponse(
         token = response_json.get(token_field)
 
         if not token:
-            raise ValueError(f"Token field '{token_field}' not found in the response.")
+            raise PSAException(
+                problem=f"Token field '{token_field}' not found in the response.",
+                source="Token Extraction",
+                action="Specify the correct token field using --token-field."
+            )
 
         return token
 
     except json.JSONDecodeError:
-        raise SystemExit(TextDisplay.error_text("Response is not valid JSON."))
-
-    except Exception as e:
-        raise SystemExit(TextDisplay.error_text(f"Error extracting token: {e}"))
+        raise PSAException(
+            problem="Response is not valid JSON.",
+            source="JSON Decoder",
+            action="The auth endpoint must return a JSON response containing the token."
+        )

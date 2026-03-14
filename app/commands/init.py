@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 from typer import Option
 
-from app.utils import TextDisplay
+from app.utils import TextDisplay, PSAException, psa_error_handler
 from app.utils import CONFIG_PATH, getDefaultConfig
 
 # pycurl init
+@psa_error_handler
 def init(
     token_file_path: str | None = Option(None, "-t", "--token-file-path", help="Path to save the token file"),
     overwrite: bool = Option(False, "-o", "--overwrite", help="Overwrite existing configuration file if it exists")
@@ -26,7 +27,11 @@ def init(
     try:
         # Validate paths
         if token_file == config_file:
-            raise SystemExit(TextDisplay.error_text("Token file and config file cannot be the same"))
+            raise PSAException(
+                problem="Token file and config file cannot be the same",
+                source="Input Validation",
+                action="Choose a different path for the token file using --token-file-path."
+            )
 
         if overwrite:
             TextDisplay.warn_text("Overwrite enabled: existing files may be replaced.")
@@ -78,4 +83,8 @@ def init(
             TextDisplay.style_text(NEXT_STEPS, style="white")
    
     except Exception as e:
-        raise SystemExit(TextDisplay.error_text(f"Failed to initialize configuration file: {e}"))
+        raise PSAException(
+            problem=f"Failed to initialize configuration file: {e}",
+            source="File System",
+            action="Check your permissions and if the path is valid."
+        )

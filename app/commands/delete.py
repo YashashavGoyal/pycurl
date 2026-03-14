@@ -2,9 +2,10 @@ import requests
 import json
 from typer import Argument, Option
 
-from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken
+from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken, PSAException, psa_error_handler
 
 # pycurl delete
+@psa_error_handler
 def delete(
     url: str = Argument(..., help="The URL to send the DELETE request to"),
     save_to_file: str = Option(None, "-o", "--output", help="File path to save the response content"),
@@ -55,9 +56,13 @@ def delete(
             TextDisplay.warn_text("DELETE request with body detected (allowed but not widely supported)")
 
         if json_data and data:
-            raise SystemExit(TextDisplay.error_text("Use either --json or --data, not both"))
+            raise PSAException(
+                problem="Use either --json or --data, not both",
+                source="Input Validation",
+                action="Provide data using either --json or --data, but not both."
+            )
 
-        elif json_data:
+        if json_data:
             # Handle JSON payload
             headers.setdefault("Content-Type", "application/json")
 
@@ -87,13 +92,13 @@ def delete(
             except ValueError:
                 response_json = {"raw_response": response.text}
             
-            TextDisplay.psa_error(
+            TextDisplay.print_json(response_json, is_result=True)
+            raise PSAException(
                 problem=f"Request failed with status code: {response.status_code}",
                 source=f"DELETE {url}",
-                action="Check the URL and headers. The service might be offline or requiring different credentials."
+                action="Check the URL and headers. The service might be offline or requiring different credentials.",
+                exit_code=response.status_code
             )
-            TextDisplay.print_json(response_json, is_result=True)
-            raise SystemExit(response.status_code) 
 
         # Success message
         TextDisplay.style_text(f"DELETE request to {url} successful.", style="white")
@@ -126,25 +131,23 @@ def delete(
             }, is_result=False)
 
     except requests.exceptions.RequestException as e:
-        TextDisplay.psa_error(
+        raise PSAException(
             problem=f"Error during DELETE request: {e}",
             source="Requests Library",
             action="Verify your network connection and the URL format."
         )
-        raise SystemExit(1)
     
     except json.JSONDecodeError as jde:
-        TextDisplay.psa_error(
+        raise PSAException(
             problem=f"Invalid JSON data: {jde}",
             source="JSON Decoder",
             action="Check the format of your --json payload."
         )
-        raise SystemExit(1)
 
     except Exception as ex:
-        TextDisplay.psa_error(
-            problem=f"An error occurred: {ex}",
+        raise PSAException(
+            problem=f"An unexpected error occurred: {ex}",
             source="Application Logic",
             action="Please report this issue if it persists."
         )
-        raise SystemExit(1)
+

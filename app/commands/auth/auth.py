@@ -1,6 +1,6 @@
 from typer import Typer, Argument, Option
 
-from app.utils import TextDisplay, authManager
+from app.utils import TextDisplay, authManager, psa_error_handler
 
 # Typer app for authentication
 auth = Typer(
@@ -32,6 +32,7 @@ def auth_callback():
     pycurl auth login https://api.example.com/login -j @login.json -t "access_token"\n
     """
 )
+@psa_error_handler
 def login(
     url: str = Argument(..., help="The URL to send the login request to"),
     json_data: str = Option(..., "-j", "--json", help="JSON data for the login request (@file for file input)"),
@@ -45,21 +46,17 @@ def login(
     """
     Perform a login request to obtain and store an authentication token.
     """
-    try:
-        authManager(
-            url=url,
-            json_data=json_data,
-            show_content=show_content,
-            success_msg="Login successful!",
-            save_to_file=save_to_file,
-            token_field=token_field,
-            store_token_to_file=store_token_to_file,
-            cookie_token=cookie_token,
-            save_alias=save_alias
-        )
-
-    except Exception as e:
-        raise SystemExit(TextDisplay.error_text(f"Login failed: {e}"))
+    authManager(
+        url=url,
+        json_data=json_data,
+        show_content=show_content,
+        success_msg="Login successful!",
+        save_to_file=save_to_file,
+        token_field=token_field,
+        store_token_to_file=store_token_to_file,
+        cookie_token=cookie_token,
+        save_alias=save_alias
+    )
 
 
 # pycurl auth register ...
@@ -71,6 +68,7 @@ def login(
     pycurl auth register https://api.example.com/register -j @user.json --save-alias newuser\n
     """
 )
+@psa_error_handler
 def register(
     url: str = Argument(..., help="The URL to send the registration request to"),
     json_data: str = Option(..., "-j", "--json", help="JSON data for the registration request (@file for file input)"),
@@ -84,18 +82,14 @@ def register(
     """
     Perform a registration request to obtain and store an authentication token.
     """
-    try:
-        authManager(
-            url=url,
-            json_data=json_data,
-            show_content=show_content,
-            success_msg="Registration successful!",
-            save_to_file=save_to_file,
-            token_field=token_field,
-            store_token_to_file=store_token_to_file,
-            cookie_token=cookie_token,
-            save_alias=save_alias
-        )
-
-    except Exception as e:
-        raise SystemExit(TextDisplay.error_text(f"Registration failed: {e}"))
+    authManager(
+        url=url,
+        json_data=json_data,
+        show_content=show_content,
+        success_msg="Registration successful!",
+        save_to_file=save_to_file,
+        token_field=token_field,
+        store_token_to_file=store_token_to_file,
+        cookie_token=cookie_token,
+        save_alias=save_alias
+    )

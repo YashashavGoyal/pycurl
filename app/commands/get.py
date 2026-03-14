@@ -1,9 +1,10 @@
 import requests
 from typer import Argument, Option
 
-from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken, CONFIG_PATH
+from app.utils import TextDisplay, saveResponseToFile, saveRequestResponse, getSavedToken, PSAException, psa_error_handler
 
 # pycurl get
+@psa_error_handler
 def get(
     url: str = Argument(..., help="The URL to send the GET request to"),
     show_content: bool = Option(False, "-s", "--show-content", help="Whether to display the response content"),
@@ -61,13 +62,13 @@ def get(
             except ValueError:
                 response_json = {"raw_response": response.text}
             
-            TextDisplay.psa_error(
+            TextDisplay.print_json(response_json, is_result=True)
+            raise PSAException(
                 problem=f"Request failed with status code: {response.status_code}",
                 source=f"GET {url}",
-                action="Check the URL and headers. The service might be offline or requiring different credentials."
+                action="Check the URL and headers. The service might be offline or requiring different credentials.",
+                exit_code=response.status_code
             )
-            TextDisplay.print_json(response_json, is_result=True)
-            raise SystemExit(response.status_code) 
 
         # Success message
         TextDisplay.style_text(f"GET request to {url} successful.", style="white")
@@ -104,9 +105,15 @@ def get(
             }, is_result=False)
 
     except requests.exceptions.RequestException as e:
-        TextDisplay.psa_error(
+        raise PSAException(
             problem=f"Error during GET request: {e}",
             source="Requests Library",
             action="Verify your network connection and the URL format."
         )
-        raise SystemExit(1)
+
+    except Exception as ex:
+        raise PSAException(
+            problem=f"An unexpected error occurred: {ex}",
+            source="Application Logic",
+            action="Please report this issue if it persists."
+        )
